@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard PV - EmergentCold | YTD 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --bg2: #eef2f7;
+
+    --card: #ffffff;
+    --card2: #f5f7fb;
+
+    --border: #d6dee8;
+    --border2: #c7d2e2;
+
+    --accent1: #f59e0b;
+    --accent2: #38bdf8;
+    --accent3: #22c55e;
+    --accent4: #84cc16;
+
+    --text: #1f2937;
+    --muted: #6b7280;
+
+    --green: #16a34a;
+    --red: #dc2626;
+    --yellow: #d97706;
+
+    --solar: #b45309;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background:#eef2f7;
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 60%, #eef2f7 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, #f59e0b, #fde68a);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 20px rgba(245,158,11,0.4);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.5px; color: var(--solar); }
+  header p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .badge {
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.5);
+    color: var(--accent1);
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-green {
+    background: rgba(74,222,128,0.12);
+    border: 1px solid rgba(74,222,128,0.4);
+    color: var(--accent3);
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+  .header-badges { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+
+  /* MAIN */
+  main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    margin-top: 32px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid #dbe4ee;
+    border-radius: 20px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15,23,42,0.); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi-card.gold::before   { background: linear-gradient(90deg, #f59e0b, #fde68a); }
+  .kpi-card.sky::before    { background: linear-gradient(90deg, #38bdf8, #7dd3fc); }
+  .kpi-card.leaf::before   { background: linear-gradient(90deg, #4ade80, #86efac); }
+  .kpi-card.lime::before   { background: linear-gradient(90deg, #a3e635, #d9f99d); }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; right: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: 0.04;
+  }
+  .kpi-card.gold::after   { background: #f59e0b; }
+  .kpi-card.sky::after    { background: #38bdf8; }
+  .kpi-card.leaf::after   { background: #4ade80; }
+  .kpi-card.lime::after   { background: #a3e635; }
+  .kpi-icon { font-size: 1.7rem; margin-bottom: 10px; }
+  .kpi-label { font-size: 0.73rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .kpi-value { font-size: 1.75rem; font-weight: 700; margin: 4px 0 6px; color: var(--solar); }
+  .kpi-sub { font-size: 0.75rem; color: var(--muted); }
+  .kpi-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .kpi-badge.up      { background: rgba(74,222,128,0.15); color: var(--green); }
+  .kpi-badge.down    { background: rgba(248,113,113,0.15); color: var(--red); }
+  .kpi-badge.neutral { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+  /* CHART GRID */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+  }
+  .chart-grid-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 1100px) {
+    .chart-grid-3col { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .chart-grid-2, .chart-grid-3, .chart-grid-3col { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid #dbe4ee;
+    border-radius: 20px;
+    padding: 22px 24px;
+    transition: box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+  }
+  .chart-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+  .chart-card.full { grid-column: 1 / -1; }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .chart-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+  .chart-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .chart-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .tag.gold   { background: rgba(245,158,11,0.15);  color: var(--accent1); }
+  .tag.sky    { background: rgba(56,189,248,0.15);  color: var(--accent2); }
+  .tag.leaf   { background: rgba(74,222,128,0.15);  color: var(--accent3); }
+  .tag.lime   { background: rgba(163,230,53,0.15);  color: var(--accent4); }
+  .tag.red    { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap.tall { height: 330px; }
+  .chart-wrap.sm { height: 200px; }
+  .chart-wrap.xl { height: 380px; }
+
+  /* PLANT SUMMARY TABLE */
+  .plant-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .plant-table thead tr { border-bottom: 1px solid var(--border); }
+  .plant-table th { color: var(--muted); font-weight: 600; text-align: left; padding: 10px 12px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; }
+  .plant-table td { padding: 11px 12px; border-bottom: 1px solid rgba(30,92,58,0.4); }
+  .plant-table tbody tr:hover { background: rgba(74,222,128,0.04); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+  .plant-table .total-row { background: rgba(74,222,128,0.06); font-weight: 700; }
+
+  /* MONTHLY TABLE */
+  .monthly-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; overflow-x: auto; }
+  .monthly-table th { color: var(--muted); font-weight: 600; padding: 10px 10px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .monthly-table td { padding: 9px 10px; border-bottom: 1px solid rgba(30,92,58,0.3); white-space: nowrap; }
+  .monthly-table tbody tr:hover { background: rgba(74,222,128,0.04); }
+  .monthly-table .ytd-row { background: rgba(245,158,11,0.08); border-top: 1px solid rgba(245,158,11,0.3); font-weight: 700; }
+  .table-scroll { overflow-x: auto; border-radius: 8px; }
+
+  /* IRRADIATION BARS */
+  .irr-row { margin-bottom: 16px; }
+  .irr-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; }
+  .irr-bar-bg { background: rgba(255,255,255,0.05); border-radius: 6px; height: 10px; }
+  .irr-bar-fill { height: 10px; border-radius: 6px; position: relative; }
+  .irr-bar-target { position: absolute; top: -3px; width: 3px; height: 16px; background: rgba(255,255,255,0.5); border-radius: 2px; }
+
+  /* CUMPLIMIENTO GAUGE */
+  .gauge-grid { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 12px; padding: 8px 0; }
+  .gauge-item { text-align: center; }
+  .gauge-circle {
+    width: 115px; height: 115px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+    position: relative;
+    margin: 0 auto 10px;
+  }
+  .gauge-label { font-size: 0.75rem; color: var(--muted); }
+  .gauge-plant { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 22px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-top: 36px;
+    background: #f4f7fb;
+  }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .filter-btn:hover { background: var(--card2); border-color: var(--border2); }
+  .filter-btn.active { border-color: var(--accent1); background: rgba(245,158,11,0.12); color: var(--accent1); }
+  .filter-label { font-size: 0.78rem; color: var(--muted); margin-right: 4px; }
+
+  /* STAT MINI CARDS */
+  .mini-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .mini-stat {
+    background: rgba(74,222,128,0.05);
+    border: 1px solid rgba(30,92,58,0.6);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .mini-stat .ms-val { font-size: 1.2rem; font-weight: 700; color: var(--solar); }
+  .mini-stat .ms-label { font-size: 0.7rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* PROGRESS BAR INLINE */
+  .prog-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .prog-bar-bg { flex: 1; background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; }
+  .prog-bar-fill { height: 6px; border-radius: 4px; }
+  .prog-pct { font-size: 0.75rem; font-weight: 700; min-width: 42px; text-align: right; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 8px 0; }
+
+  /* GLOW EFFECTS */
+  .glow-gold { box-shadow: 0 0 16px rgba(245,158,11,0.2); }
+  .glow-leaf { box-shadow: 0 0 16px rgba(74,222,128,0.2); }
+  .glow-sky  { box-shadow: 0 0 16px rgba(56,189,248,0.2); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo">☀️</div>
+    <div>
+      <h1>Centro de Control PV — EmergentCold</h1>
+      <p>Monitoreo de Generación · DURAN · CAUCEDO · FP4 (Chile)</p>
+    </div>
+  </div>
+  <div class="header-badges">
+    <div class="badge">📅 Febrero 2026</div>
+    <div class="badge-green">🌱 YTD May 2025 → Mar 2026</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ─── KPI MENSUAL ─── -->
+  <div class="section-title">⚡ Resumen KPIs — Febrero 2026</div>
+  <div class="kpi-grid">
+
+    <div class="kpi-card gold">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Energía Total Generada</div>
+      <div class="kpi-value">503,979.7</div>
+      <div class="kpi-sub">kWh — 3 plantas combinadas</div>
+    </div>
+
+    <div class="kpi-card sky">
+      <div class="kpi-icon">🏭</div>
+      <div class="kpi-label">Capacidad Instalada Total</div>
+      <div class="kpi-value">3,489.6</div>
+      <div class="kpi-sub">kWp (DURAN + CAUCEDO + FP4)</div>
+    </div>
+
+    <div class="kpi-card gold">
+      <div class="kpi-icon">☀️</div>
+      <div class="kpi-label">Irradiación PV DURAN</div>
+      <div class="kpi-value">99.23</div>
+      <div class="kpi-sub">kWh/m² real vs 125.3 contractual</div>
+      <span class="kpi-badge down">▼ 20.8% déficit</span>
+    </div>
+
+    <div class="kpi-card sky">
+      <div class="kpi-icon">🌤️</div>
+      <div class="kpi-label">Irradiación PV FP4</div>
+      <div class="kpi-value">180.24</div>
+      <div class="kpi-sub">kWh/m² real vs 206.66 contractual</div>
+      <span class="kpi-badge down">▼ 12.8% déficit</span>
+    </div>
+
+  </div>
+
+  <!-- ─── FILTRO PLANTAS ─── -->
+  <div class="section-title">📈 Generación Diaria — Febrero 2026</div>
+  <div class="filter-bar">
+    <span class="filter-label">Ver:</span>
+    <button class="filter-btn active" onclick="filterChart('all', this)">Todas las plantas</button>
+    <button class="filter-btn" onclick="filterChart('duran', this)">PV DURAN</button>
+    <button class="filter-btn" onclick="filterChart('caucedo', this)">PV CAUCEDO</button>
+    <button class="filter-btn" onclick="filterChart('fp4', this)">PV FP4</button>
+  </div>
+
+  <!-- ─── GRÁFICO GENERACIÓN DIARIA ─── -->
+  <div class="chart-card" style="margin-bottom:18px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Generación Diaria por Planta (kWh)</div>
+        <div class="chart-subtitle">28 días · Febrero 2026</div>
+      </div>
+      <div class="chart-tags">
+        <span class="tag gold">PV DURAN</span>
+        <span class="tag sky">PV CAUCEDO</span>
+        <span class="tag leaf">PV FP4</span>
+      </div>
+    </div>
+    <div class="chart-wrap tall">
+      <canvas id="chartDiario"></canvas>
+    </div>
+  </div>
+
+  <!-- ─── GENERACION ACUMULADA + PIE ─── -->
+  <div class="chart-grid-3" style="margin-bottom:18px;">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Generación Acumulada (kWh)</div>
+          <div class="chart-subtitle">Suma acumulada día a día · Febrero 2026</div>
+        </div>
+        <div class="chart-tags">
+          <span class="tag gold">DURAN</span>
+          <span class="tag sky">CAUCEDO</span>
+          <span class="tag leaf">FP4</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartAcumulado"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Participación por Planta</div>
+          <div class="chart-subtitle">% del total generado</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartPie"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CUMPLIMIENTO CONTRACTUAL FEB ─── -->
+  <div class="section-title">🎯 Cumplimiento Contractual — Febrero 2026</div>
+  <div class="chart-grid-2" style="margin-bottom:18px;">
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Energía Real vs Contractual (kWh)</div>
+          <div class="chart-subtitle">Comparación por planta · Febrero 2026</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartContractual"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">% Cumplimiento por Planta</div>
+          <div class="chart-subtitle">Porcentaje respecto al contrato</div>
+        </div>
+      </div>
+      <div class="gauge-grid" style="padding: 20px 0;">
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#f59e0b 0% 100%, #1e3a2a 100%); box-shadow: 0 0 22px rgba(245,158,11,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent1);">106.7%</span>
+          </div>
+          <div class="gauge-plant">PV DURAN</div>
+          <div class="gauge-label">74,787 / 70,110 kWh</div>
+          <span class="kpi-badge up" style="font-size:0.7rem;">✅ SOBRE CONTRATO</span>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#38bdf8 0% 94.89%, #1e3a2a 94.89% 100%); box-shadow: 0 0 22px rgba(56,189,248,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent2);">94.9%</span>
+          </div>
+          <div class="gauge-plant">PV CAUCEDO</div>
+          <div class="gauge-label">56,006 / 59,020 kWh</div>
+          <span class="kpi-badge down" style="font-size:0.7rem;">⚠️ BAJO CONTRATO</span>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#4ade80 0% 98.83%, #1e3a2a 98.83% 100%); box-shadow: 0 0 22px rgba(74,222,128,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent3);">98.8%</span>
+          </div>
+          <div class="gauge-plant">PV FP4</div>
+          <div class="gauge-label">373,187 / 377,628 kWh</div>
+          <span class="kpi-badge neutral" style="font-size:0.7rem;">🔶 CERCANO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── IRRADIACIÓN ─── -->
+  <div class="section-title">🌞 Irradiación Solar — Real vs Contractual</div>
+  <div class="chart-grid-2" style="margin-bottom:18px;">
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Irradiación Real vs Contractual (kWh/m²)</div>
+          <div class="chart-subtitle">PV DURAN y PV FP4 · PV CAUCEDO sin dato</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartIrrBar"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Déficit de Irradiación</div>
+          <div class="chart-subtitle">kWh/m² faltante respecto al contrato</div>
+        </div>
+      </div>
+      <div style="padding: 16px 0;">
+        <div class="irr-row">
+          <div class="irr-label">
+            <span style="color:var(--accent1); font-weight:600;">PV DURAN</span>
+            <span style="color:var(--muted);">99.23 / 125.3 kWh/m²</span>
+          </div>
+          <div class="irr-bar-bg">
+            <div class="irr-bar-fill" style="width:79.2%; background: linear-gradient(90deg, #f59e0b, #fde68a);">
+              <div class="irr-bar-target" style="left:100%; transform:translateX(-50%)"></div>
+            </div>
+          </div>
+          <div style="font-size:0.72rem; color: var(--red); margin-top:4px;">▼ Déficit: 26.07 kWh/m² (−20.8%)</div>
+        </div>
+        <div class="irr-row">
+          <div class="irr-label">
+            <span style="color:var(--accent2); font-weight:600;">PV CAUCEDO</span>
+            <span style="color:var(--muted);">Sin dato disponible</span>
+          </div>
+          <div class="irr-bar-bg">
+            <div class="irr-bar-fill" style="width:0%; background: #38bdf8;"></div>
+          </div>
+          <div style="font-size:0.72rem; color: var(--muted); margin-top:4px;">— No se monitorea irradiación</div>
+        </div>
+        <div class="irr-row">
+          <div class="irr-label">
+            <span style="color:var(--accent3); font-weight:600;">PV FP4</span>
+            <span style="color:var(--muted);">180.24 / 206.66 kWh/m²</span>
+          </div>
+          <div class="irr-bar-bg">
+            <div class="irr-bar-fill" style="width:87.2%; background: linear-gradient(90deg, #4ade80, #86efac);">
+              <div class="irr-bar-target" style="left:100%; transform:translateX(-50%)"></div>
+            </div>
+          </div>
+          <div style="font-size:0.72rem; color: var(--yellow); margin-top:4px;">▼ Déficit: 26.42 kWh/m² (−12.8%)</div>
+        </div>
+        <div style="margin-top:20px; padding:14px; background: rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.2); border-radius:10px; font-size:0.8rem; color:var(--muted);">
+          💡 <strong style="color:var(--text);">Nota:</strong> El déficit de irradiación en ambas plantas justifica parcialmente la generación inferior al contrato. Febrero 2026 presentó condiciones de menor radiación solar respecto a la línea base contractual.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TABLA RESUMEN FEB ─── -->
+  <div class="section-title">📋 Tabla Resumen por Planta — Febrero 2026</div>
+  <div class="chart-card" style="margin-bottom:18px;">
+    <table class="plant-table">
+      <thead>
+        <tr>
+          <th>Planta</th>
+          <th>Capacidad (kWp)</th>
+          <th>Energía Real (kWh)</th>
+          <th>Energía Contractual (kWh)</th>
+          <th>Cumplimiento</th>
+          <th>Irrad. Real (kWh/m²)</th>
+          <th>Irrad. Contrato (kWh/m²)</th>
+          <th>Var. Irrad.</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:var(--accent1)"></span>PV DURAN</td>
+          <td>763.8</td>
+          <td><strong>74,787.1</strong></td>
+          <td>70,110.0</td>
+          <td style="color:var(--green); font-weight:700;">106.7%</td>
+          <td>99.23</td>
+          <td>125.30</td>
+          <td style="color:var(--red);">−20.8%</td>
+          <td><span class="kpi-badge up">SOBRE META</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--accent2)"></span>PV CAUCEDO</td>
+          <td>525.82</td>
+          <td><strong>56,006.1</strong></td>
+          <td>59,019.8</td>
+          <td style="color:var(--red); font-weight:700;">94.9%</td>
+          <td>—</td>
+          <td>—</td>
+          <td style="color:var(--muted);">N/D</td>
+          <td><span class="kpi-badge down">BAJO META</span></td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--accent3)"></span>PV FP4</td>
+          <td>2,200.0</td>
+          <td><strong>373,186.5</strong></td>
+          <td>377,628.4</td>
+          <td style="color:var(--yellow); font-weight:700;">98.8%</td>
+          <td>180.24</td>
+          <td>206.66</td>
+          <td style="color:var(--yellow);">−12.8%</td>
+          <td><span class="kpi-badge neutral">CERCANO</span></td>
+        </tr>
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td><strong>3,489.6</strong></td>
+          <td><strong>503,979.7</strong></td>
+          <td><strong>506,758.2</strong></td>
+          <td style="color:var(--yellow); font-weight:700;">99.5%</td>
+          <td colspan="3" style="color:var(--muted); font-weight:400; font-size:0.8rem;">— Promedio ponderado</td>
+          <td><span class="kpi-badge neutral">GLOBAL</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── BARRAS APILADAS ─── -->
+  <div class="section-title">🔥 Análisis de Variabilidad Diaria — Febrero 2026</div>
+  <div class="chart-card" style="margin-bottom: 18px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Generación Diaria — Barras Apiladas (kWh)</div>
+        <div class="chart-subtitle">Contribución de cada planta por día</div>
+      </div>
+      <div class="chart-tags">
+        <span class="tag gold">DURAN</span>
+        <span class="tag sky">CAUCEDO</span>
+        <span class="tag leaf">FP4</span>
+      </div>
+    </div>
+    <div class="chart-wrap tall">
+      <canvas id="chartStacked"></canvas>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- ─── SECCIÓN YTD ─── -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="section-title" style="margin-top:44px;">🌿 ANÁLISIS YTD — Acumulado Mayo 2025 → Marzo 2026</div>
+
+  <!-- KPI YTD -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+
+    <div class="kpi-card leaf glow-leaf">
+      <div class="kpi-icon">🌱</div>
+      <div class="kpi-label">YTD Total — 3 Plantas</div>
+      <div class="kpi-value" style="font-size:1.6rem;">4,117,484</div>
+      <div class="kpi-sub">kWh generados acumulados</div>
+      <span class="kpi-badge neutral">Contrato: 4,453,372 kWh</span>
+    </div>
+
+    <div class="kpi-card gold glow-gold">
+      <div class="kpi-icon">☀️</div>
+      <div class="kpi-label">YTD PV FP4 (Chile)</div>
+      <div class="kpi-value" style="font-size:1.6rem;">2,963,087</div>
+      <div class="kpi-sub">kWh real · Contrato: 3,174,496</div>
+      <span class="kpi-badge neutral">93.3% cumplimiento</span>
+    </div>
+
+    <div class="kpi-card sky glow-sky">
+      <div class="kpi-icon">🏝️</div>
+      <div class="kpi-label">YTD PV CAUCEDO</div>
+      <div class="kpi-value" style="font-size:1.6rem;">619,166</div>
+      <div class="kpi-sub">kWh real · Contrato: 705,713</div>
+      <span class="kpi-badge down">87.7% cumplimiento</span>
+    </div>
+
+    <div class="kpi-card lime">
+      <div class="kpi-icon">⚙️</div>
+      <div class="kpi-label">YTD PV DURAN</div>
+      <div class="kpi-value" style="font-size:1.6rem;">535,231</div>
+      <div class="kpi-sub">kWh real · Contrato: 573,163</div>
+      <span class="kpi-badge down">93.4% cumplimiento</span>
+    </div>
+
+  </div>
+
+  <!-- ─── GRÁFICO TENDENCIA MENSUAL YTD ─── -->
+  <div class="section-title">📅 Tendencia Mensual YTD — COM vs REAL por Planta</div>
+
+  <!-- FP4 (Chile) Monthly -->
+  <div class="chart-card" style="margin-bottom:18px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">PV FP4 (Chile) — Energía Mensual: Contractual vs Real (kWh)</div>
+        <div class="chart-subtitle">Mayo 2025 → 8 Marzo 2026 · Incluye YTD parcial</div>
+      </div>
+      <div class="chart-tags">
+        <span class="tag leaf">Real</span>
+        <span class="tag lime">Contractual</span>
+      </div>
+    </div>
+    <div class="chart-wrap tall">
+      <canvas id="chartYTD_FP4"></canvas>
+    </div>
+  </div>
+
+  <!-- CAUCEDO + DURAN en 2 columnas -->
+  <div class="chart-grid-2" style="margin-bottom:18px;">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">PV CAUCEDO — Mensual COM vs REAL</div>
+          <div class="chart-subtitle">Mayo 2025 → 8 Marzo 2026</div>
+        </div>
+        <div class="chart-tags">
+          <span class="tag sky">Real</span>
+          <span class="tag lime">Contractual</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartYTD_CAU"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">PV DURAN — Mensual COM vs REAL</div>
+          <div class="chart-subtitle">Agosto 2025 → 8 Marzo 2026</div>
+        </div>
+        <div class="chart-tags">
+          <span class="tag gold">Real</span>
+          <span class="tag lime">Contractual</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartYTD_DUR"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── GRÁFICO DIFERENCIA % MENSUAL ─── -->
+  <div class="section-title">📉 Variación Porcentual Mensual vs Contrato (%)</div>
+  <div class="chart-card" style="margin-bottom:18px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">% Diferencia Real vs Contractual por Planta y Mes</div>
+        <div class="chart-subtitle">Valores positivos = sobre contrato · Negativos = bajo contrato</div>
+      </div>
+      <div class="chart-tags">
+        <span class="tag gold">DURAN</span>
+        <span class="tag sky">CAUCEDO</span>
+        <span class="tag leaf">FP4</span>
+      </div>
+    </div>
+    <div class="chart-wrap tall">
+      <canvas id="chartDifPct"></canvas>
+    </div>
+  </div>
+
+  <!-- ─── TABLA MENSUAL DETALLADA ─── -->
+  <div class="section-title">📊 Tabla Detallada YTD por Planta y Mes</div>
+
+  <!-- CAUCEDO TABLE -->
+  <div class="chart-card" style="margin-bottom:14px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>PV CAUCEDO — Detalle Mensual</div>
+        <div class="chart-subtitle">Mayo 2025 → Marzo 2026</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="monthly-table">
+        <thead>
+          <tr>
+            <th>Métrica</th>
+            <th>May-25</th><th>Jun-25</th><th>Jul-25</th><th>Ago-25</th>
+            <th>Sep-25</th><th>Oct-25</th><th>Nov-25</th><th>Dic-25</th>
+            <th>Ene-26</th><th>Feb-26</th><th>Mar-26*</th><th style="color:var(--accent1);">YTD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">COM (kWh)</td>
+            <td>81,601</td><td>77,875</td><td>80,526</td><td>77,836</td>
+            <td>72,736</td><td>66,810</td><td>57,820</td><td>56,658</td>
+            <td>55,840</td><td>59,020</td><td>18,991</td>
+            <td style="color:var(--accent1); font-weight:700;">705,713</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--accent2);">REAL (kWh)</td>
+            <td>63,581</td><td>63,614</td><td>59,416</td><td>79,218</td>
+            <td>64,967</td><td>58,139</td><td>50,501</td><td>52,358</td>
+            <td>55,595</td><td>56,006</td><td>15,772</td>
+            <td style="color:var(--accent2); font-weight:700;">619,166</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">DIF (kWh)</td>
+            <td style="color:var(--red);">−18,020</td>
+            <td style="color:var(--red);">−14,261</td>
+            <td style="color:var(--red);">−21,110</td>
+            <td style="color:var(--green);">+1,382</td>
+            <td style="color:var(--red);">−7,769</td>
+            <td style="color:var(--red);">−8,671</td>
+            <td style="color:var(--red);">−7,319</td>
+            <td style="color:var(--red);">−4,301</td>
+            <td style="color:var(--red);">−245</td>
+            <td style="color:var(--red);">−3,014</td>
+            <td style="color:var(--red);">−3,219</td>
+            <td style="color:var(--red); font-weight:700;">−86,547</td>
+          </tr>
+          <tr class="ytd-row">
+            <td style="font-weight:700; color:var(--yellow);">DIF (%)</td>
+            <td style="color:var(--red);">−22.1%</td>
+            <td style="color:var(--red);">−18.3%</td>
+            <td style="color:var(--red);">−26.2%</td>
+            <td style="color:var(--green);">+1.8%</td>
+            <td style="color:var(--red);">−10.7%</td>
+            <td style="color:var(--red);">−13.0%</td>
+            <td style="color:var(--red);">−12.7%</td>
+            <td style="color:var(--red);">−7.6%</td>
+            <td style="color:var(--red);">−0.4%</td>
+            <td style="color:var(--red);">−5.1%</td>
+            <td style="color:var(--red);">−17.0%</td>
+            <td style="color:var(--red); font-weight:700;">−12.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FP4 TABLE -->
+  <div class="chart-card" style="margin-bottom:14px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title"><span class="dot" style="background:var(--accent3)"></span>PV FP4 (Chile) — Detalle Mensual</div>
+        <div class="chart-subtitle">Mayo 2025 → Marzo 2026</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="monthly-table">
+        <thead>
+          <tr>
+            <th>Métrica</th>
+            <th>May-25</th><th>Jun-25</th><th>Jul-25</th><th>Ago-25</th>
+            <th>Sep-25</th><th>Oct-25</th><th>Nov-25</th><th>Dic-25</th>
+            <th>Ene-26</th><th>Feb-26</th><th>Mar-26*</th><th style="color:var(--accent1);">YTD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">COM (kWh)</td>
+            <td>148,500</td><td>113,097</td><td>137,055</td><td>186,523</td>
+            <td>281,093</td><td>377,798</td><td>464,900</td><td>520,964</td>
+            <td>481,332</td><td>377,628</td><td>85,605</td>
+            <td style="color:var(--accent1); font-weight:700;">3,174,496</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--accent3);">REAL (kWh)</td>
+            <td>162,702</td><td>115,868</td><td>120,919</td><td>164,676</td>
+            <td>243,699</td><td>406,903</td><td>379,947</td><td>466,476</td>
+            <td>446,784</td><td>373,187</td><td>81,927</td>
+            <td style="color:var(--accent3); font-weight:700;">2,963,087</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">DIF (kWh)</td>
+            <td style="color:var(--green);">+14,202</td>
+            <td style="color:var(--green);">+2,771</td>
+            <td style="color:var(--red);">−16,136</td>
+            <td style="color:var(--red);">−21,847</td>
+            <td style="color:var(--red);">−37,394</td>
+            <td style="color:var(--green);">+29,105</td>
+            <td style="color:var(--red);">−84,953</td>
+            <td style="color:var(--red);">−54,488</td>
+            <td style="color:var(--red);">−34,548</td>
+            <td style="color:var(--red);">−4,441</td>
+            <td style="color:var(--red);">−3,678</td>
+            <td style="color:var(--red); font-weight:700;">−211,409</td>
+          </tr>
+          <tr class="ytd-row">
+            <td style="font-weight:700; color:var(--yellow);">DIF (%)</td>
+            <td style="color:var(--green);">+9.6%</td>
+            <td style="color:var(--green);">+2.5%</td>
+            <td style="color:var(--red);">−11.8%</td>
+            <td style="color:var(--red);">−11.7%</td>
+            <td style="color:var(--red);">−13.3%</td>
+            <td style="color:var(--green);">+7.7%</td>
+            <td style="color:var(--red);">−18.3%</td>
+            <td style="color:var(--red);">−10.5%</td>
+            <td style="color:var(--red);">−7.2%</td>
+            <td style="color:var(--red);">−1.2%</td>
+            <td style="color:var(--red);">−4.3%</td>
+            <td style="color:var(--red); font-weight:700;">−6.7%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DURAN TABLE -->
+  <div class="chart-card" style="margin-bottom:18px;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title"><span class="dot" style="background:var(--accent1)"></span>PV DURAN — Detalle Mensual</div>
+        <div class="chart-subtitle">Agosto 2025 → Marzo 2026 (inicio de operaciones)</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="monthly-table">
+        <thead>
+          <tr>
+            <th>Métrica</th>
+            <th>Ago-25</th><th>Sep-25</th><th>Oct-25</th><th>Nov-25</th>
+            <th>Dic-25</th><th>Ene-26</th><th>Feb-26</th><th>Mar-26*</th>
+            <th style="color:var(--accent1);">YTD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">COM (kWh)</td>
+            <td>86,113</td><td>81,164</td><td>80,174</td><td>78,194</td>
+            <td>82,153</td><td>73,640</td><td>70,110</td><td>21,615</td>
+            <td style="color:var(--accent1); font-weight:700;">573,163</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--accent1);">REAL (kWh)</td>
+            <td>77,539</td><td>76,112</td><td>79,165</td><td>62,237</td>
+            <td>75,440</td><td>70,884</td><td>74,787</td><td>19,068</td>
+            <td style="color:var(--accent1); font-weight:700;">535,231</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600; color:var(--muted);">DIF (kWh)</td>
+            <td style="color:var(--red);">−8,574</td>
+            <td style="color:var(--red);">−5,052</td>
+            <td style="color:var(--red);">−1,009</td>
+            <td style="color:var(--red);">−15,957</td>
+            <td style="color:var(--red);">−6,713</td>
+            <td style="color:var(--red);">−2,756</td>
+            <td style="color:var(--green);">+4,677</td>
+            <td style="color:var(--red);">−2,547</td>
+            <td style="color:var(--red); font-weight:700;">−37,932</td>
+          </tr>
+          <tr class="ytd-row">
+            <td style="font-weight:700; color:var(--yellow);">DIF (%)</td>
+            <td style="color:var(--red);">−10.0%</td>
+            <td style="color:var(--red);">−6.2%</td>
+            <td style="color:var(--red);">−1.3%</td>
+            <td style="color:var(--red);">−20.4%</td>
+            <td style="color:var(--red);">−8.2%</td>
+            <td style="color:var(--red);">−3.7%</td>
+            <td style="color:var(--green);">+6.7%</td>
+            <td style="color:var(--red);">−11.8%</td>
+            <td style="color:var(--red); font-weight:700;">−6.6%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px; font-size:0.72rem; color:var(--muted);">* Mar-26: datos parciales al 8 de marzo 2026</div>
+  </div>
+
+  <!-- ─── CUMPLIMIENTO YTD GAUGE ─── -->
+  <div class="section-title">🏆 Resumen Cumplimiento YTD por Planta</div>
+  <div class="chart-grid-2" style="margin-bottom:18px;">
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Energía Real vs Contractual YTD (kWh)</div>
+          <div class="chart-subtitle">Totales acumulados por planta</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartYTD_Bar"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">% Cumplimiento YTD</div>
+          <div class="chart-subtitle">Porcentaje respecto al contrato acumulado</div>
+        </div>
+      </div>
+      <div class="gauge-grid" style="padding: 18px 0;">
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#4ade80 0% 93.4%, #1e3a2a 93.4% 100%); box-shadow: 0 0 22px rgba(74,222,128,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent3);">93.4%</span>
+          </div>
+          <div class="gauge-plant">PV DURAN</div>
+          <div class="gauge-label">535,231 / 573,163 kWh</div>
+          <span class="kpi-badge down" style="font-size:0.7rem;">⚠️ BAJO CONTRATO</span>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#38bdf8 0% 87.7%, #1e3a2a 87.7% 100%); box-shadow: 0 0 22px rgba(56,189,248,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent2);">87.7%</span>
+          </div>
+          <div class="gauge-plant">PV CAUCEDO</div>
+          <div class="gauge-label">619,166 / 705,713 kWh</div>
+          <span class="kpi-badge down" style="font-size:0.7rem;">⚠️ BAJO CONTRATO</span>
+        </div>
+        <div class="gauge-item">
+          <div class="gauge-circle" style="background: conic-gradient(#f59e0b 0% 93.3%, #1e3a2a 93.3% 100%); box-shadow: 0 0 22px rgba(245,158,11,0.3);">
+            <span style="background:var(--card); width:82px; height:82px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--accent1);">93.3%</span>
+          </div>
+          <div class="gauge-plant">PV FP4</div>
+          <div class="gauge-label">2,963,087 / 3,174,496 kWh</div>
+          <span class="kpi-badge neutral" style="font-size:0.7rem;">🔶 CERCANO</span>
+        </div>
+      </div>
+
+      <!-- Mini stats YTD global -->
+      <div class="divider" style="margin-top:12px;"></div>
+      <div class="mini-stat-grid">
+        <div class="mini-stat">
+          <div class="ms-val">4,117,484</div>
+          <div class="ms-label">kWh Real YTD Total</div>
+        </div>
+        <div class="mini-stat">
+          <div class="ms-val">4,453,372</div>
+          <div class="ms-label">kWh COM YTD Total</div>
+        </div>
+        <div class="mini-stat">
+          <div class="ms-val" style="color:var(--red);">−335,888</div>
+          <div class="ms-label">kWh Déficit YTD</div>
+        </div>
+        <div class="mini-stat">
+          <div class="ms-val" style="color:var(--yellow);">92.5%</div>
+          <div class="ms-label">Cumpl. Global YTD</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PROGRESO YTD VISUAL ─── -->
+  <div class="section-title">📏 Progreso de Cumplimiento Contractual YTD</div>
+  <div class="chart-card" style="margin-bottom:18px;">
+    <div style="padding: 10px 8px;">
+      <!-- FP4 -->
+      <div style="margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:600; color:var(--accent3);">PV FP4 (Chile)</span>
+          <span style="font-size:0.82rem; color:var(--muted);">2,963,087 / 3,174,496 kWh &nbsp;·&nbsp; <strong style="color:var(--yellow);">93.3%</strong></span>
+        </div>
+        <div class="prog-bar-bg" style="height:14px; border-radius:8px;">
+          <div class="prog-bar-fill" style="width:93.3%; height:14px; border-radius:8px; background: linear-gradient(90deg, #4ade80, #86efac); position:relative;">
+            <div style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:0.65rem; font-weight:700; color:#071912;">93.3%</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem; color:var(--muted); margin-top:5px;">Déficit: −211,409 kWh (−6.7%)</div>
+      </div>
+      <!-- DURAN -->
+      <div style="margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:600; color:var(--accent1);">PV DURAN</span>
+          <span style="font-size:0.82rem; color:var(--muted);">535,231 / 573,163 kWh &nbsp;·&nbsp; <strong style="color:var(--yellow);">93.4%</strong></span>
+        </div>
+        <div class="prog-bar-bg" style="height:14px; border-radius:8px;">
+          <div class="prog-bar-fill" style="width:93.4%; height:14px; border-radius:8px; background: linear-gradient(90deg, #f59e0b, #fde68a); position:relative;">
+            <div style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:0.65rem; font-weight:700; color:#071912;">93.4%</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem; color:var(--muted); margin-top:5px;">Déficit: −37,932 kWh (−6.6%)</div>
+      </div>
+      <!-- CAUCEDO -->
+      <div style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:600; color:var(--accent2);">PV CAUCEDO</span>
+          <span style="font-size:0.82rem; color:var(--muted);">619,166 / 705,713 kWh &nbsp;·&nbsp; <strong style="color:var(--red);">87.7%</strong></span>
+        </div>
+        <div class="prog-bar-bg" style="height:14px; border-radius:8px;">
+          <div class="prog-bar-fill" style="width:87.7%; height:14px; border-radius:8px; background: linear-gradient(90deg, #38bdf8, #7dd3fc); position:relative;">
+            <div style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:0.65rem; font-weight:700; color:#071912;">87.7%</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem; color:var(--muted); margin-top:5px;">Déficit: −86,547 kWh (−12.3%)</div>
+      </div>
+
+      <div style="margin-top:20px; padding:14px; background: rgba(163,230,53,0.06); border:1px solid rgba(163,230,53,0.2); border-radius:10px; font-size:0.8rem; color:var(--muted); line-height:1.6;">
+        🌿 <strong style="color:var(--text);">Análisis YTD:</strong> PV CAUCEDO presenta el mayor déficit acumulado (−12.3%), seguida de FP4 y DURAN (~6.6%). El mes de Noviembre 2025 fue el más crítico para FP4 (−18.3%) y DURAN (−20.4%). En Febrero 2026, DURAN logró superar su contrato por primera vez (+6.7%).
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  🌱 Centro de Control — EmergentCold &nbsp;|&nbsp; Dashboard PV Generación Solar &nbsp;|&nbsp; YTD Mayo 2025 → Marzo 2026 &nbsp;|&nbsp; Powered by Energía Renovable
+</footer>
+
+<script>
+// ─── DATOS FEBRERO 2026 ───
+const labels28 = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10','D11','D12','D13','D14','D15','D16','D17','D18','D19','D20','D21','D22','D23','D24','D25','D26','D27','D28'];
+const duranFeb   = [1991.3,2960,3549.3,1891,2302.9,2695.3,1499.8,3149,2193,2556.9,2061.5,2680.1,2603,3645.6,2007.8,2557,3295.4,2651.4,3598.2,2933,3218.9,3409.6,2962.3,3168.2,1501.5,2821.4,2328.1,2555.6];
+const caucedoFeb = [2206.3,968,1930,1385,1336,2502,1003.8,140,2051,2434,2402,2505,1698,1890,1637,2527,2455,2003,2759,2497,2732,2604,684,1992,2410,2523,2454,2278];
+const fp4Feb     = [13408.7,12588.8,10486.3,6417.9,14770.4,15146.2,14623.8,12374.5,14603.4,10815.7,14758.4,14958,15074.9,15276.9,15138.8,14864.4,9767.6,15818.3,15801.1,15034.9,14613.6,14573.5,14499.9,13610.2,9720.9,13564.8,10634,10240.6];
+
+// ─── DATOS YTD ───
+const mesesCau = ['May-25','Jun-25','Jul-25','Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26*'];
+const comCau   = [81601,77875,80526,77836,72736,66810,57820,56658,55840,59019.8,18991];
+const realCau  = [63580.7,63614.4,59415.6,79217.8,64967.3,58138.6,50501.1,52357.5,55595.1,56006.1,15772];
+
+const mesesFP4 = ['May-25','Jun-25','Jul-25','Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26*'];
+const comFP4   = [148500,113097,137055,186523,281093,377798,464900,520964,481332,377628.44,85604.8];
+const realFP4  = [162702,115868,120919,164676,243699,406902.8,379947,466476,446784.3,373186.5,81927];
+
+const mesesDur = ['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26*'];
+const comDur   = [86113,81164,80174,78194,82153,73640,70110,21615];
+const realDur  = [77538.7,76111.6,79164.7,62236.8,75440,70884.1,74787.1,19067.7];
+
+// ─── DIFERENCIAS % ───
+const difPctCau = mesesCau.map((m,i) => +((realCau[i]/comCau[i]*100 - 100).toFixed(2)));
+const difPctFP4 = mesesFP4.map((m,i) => +((realFP4[i]/comFP4[i]*100 - 100).toFixed(2)));
+const difPctDurFull = [null,null,null,...mesesDur.map((m,i) => +((realDur[i]/comDur[i]*100 - 100).toFixed(2)))];
+
+// ─── CHART DEFAULTS ───
+Chart.defaults.color = '#4b5563';
+Chart.defaults.borderColor = 'rgba(107,114,128,0.2)';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+
+const mkTooltip = (extraCb) => ({
+  plugins: {
+    tooltip: {
+      backgroundColor: '#0f2d20',
+      borderColor: '#1e5c3a',
+      borderWidth: 1,
+      titleColor: '#e8f5e9',
+      bodyColor: '#7db99a',
+      padding: 11,
+      callbacks: extraCb || { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString('es-ES',{minimumFractionDigits:1}) ?? ctx.parsed.toLocaleString('es-ES')} kWh` }
+    },
+    legend: { labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, color: '#7db99a' } }
+  }
+});
+
+// ─── 1. GRÁFICO DIARIO ───
+let chartDiario = new Chart(document.getElementById('chartDiario'), {
+  type: 'line',
+  data: {
+    labels: labels28,
+    datasets: [
+      { label: 'PV DURAN',   data: duranFeb,   borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)',  tension: 0.35, pointRadius: 3, pointHoverRadius: 6, fill: true },
+      { label: 'PV CAUCEDO', data: caucedoFeb, borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.08)', tension: 0.35, pointRadius: 3, pointHoverRadius: 6, fill: true },
+      { label: 'PV FP4',     data: fp4Feb,     borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.06)',  tension: 0.35, pointRadius: 3, pointHoverRadius: 6, fill: true }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { grid: { color: 'rgba(30,92,58,0.35)' } },
+      y: { grid: { color: 'rgba(30,92,58,0.35)' }, ticks: { callback: v => v.toLocaleString('es-ES') + ' kWh' } }
+    },
+    ...mkTooltip()
+  }
+});
+
+// ─── 2. ACUMULADO ───
+function cumsum(arr) { let s=0; return arr.map(v=>{ s+=v; return Math.round(s); }); }
+new Chart(document.getElementById('chartAcumulado'), {
+  type: 'line',
+  data: {
+    labels: labels28,
+    datasets: [
+      { label: 'PV DURAN',   data: cumsum(duranFeb),   borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.07)', tension:0.35, fill:true, pointRadius:0 },
+      { label: 'PV CAUCEDO', data: cumsum(caucedoFeb), borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.07)', tension:0.35, fill:true, pointRadius:0 },
+      { label: 'PV FP4',     data: cumsum(fp4Feb),     borderColor: '#4ade80', backgroundColor: 'rgba(74,222,128,0.07)', tension:0.35, fill:true, pointRadius:0 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { grid: { color: 'rgba(30,92,58,0.35)' } },
+      y: { grid: { color: 'rgba(30,92,58,0.35)' }, ticks: { callback: v => (v/1000).toFixed(0)+'k' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor: '#0f2d20', borderColor: '#1e5c3a', borderWidth:1,
+        titleColor: '#e8f5e9', bodyColor: '#7db99a', padding:11,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('es-ES')} kWh acum.` }
+      },
+      legend: { labels: { usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 3. PIE ───
+new Chart(document.getElementById('chartPie'), {
+  type: 'doughnut',
+  data: {
+    labels: ['PV DURAN', 'PV CAUCEDO', 'PV FP4'],
+    datasets: [{
+      data: [74787.1, 56006.1, 373186.5],
+      backgroundColor: ['rgba(245,158,11,0.85)', 'rgba(56,189,248,0.85)', 'rgba(74,222,128,0.85)'],
+      borderColor: ['#f59e0b','#38bdf8','#4ade80'],
+      borderWidth: 2, hoverOffset: 10
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false, cutout: '65%',
+    plugins: {
+      tooltip: {
+        backgroundColor: '#0f2d20', borderColor: '#1e5c3a', borderWidth:1,
+        titleColor: '#e8f5e9', bodyColor: '#7db99a', padding:11,
+        callbacks: {
+          label: ctx => { const t=503979.7; const p=((ctx.raw/t)*100).toFixed(1); return ` ${ctx.raw.toLocaleString('es-ES')} kWh (${p}%)`; }
+        }
+      },
+      legend: { position:'bottom', labels: { usePointStyle:true, pointStyle:'circle', padding:14, font:{size:12}, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 4. CONTRACTUAL BAR FEB ───
+new Chart(document.getElementById('chartContractual'), {
+  type: 'bar',
+  data: {
+    labels: ['PV DURAN', 'PV CAUCEDO', 'PV FP4'],
+    datasets: [
+      { label: 'Energía Real',        data: [74787.1, 56006.1, 373186.5], backgroundColor: ['rgba(245,158,11,0.8)','rgba(56,189,248,0.8)','rgba(74,222,128,0.8)'], borderRadius:6, borderSkipped:false },
+      { label: 'Energía Contractual', data: [70110, 59019.8, 377628.44],  backgroundColor: ['rgba(245,158,11,0.2)','rgba(56,189,248,0.2)','rgba(74,222,128,0.2)'], borderColor:['#f59e0b','#38bdf8','#4ade80'], borderWidth:2, borderRadius:6, borderSkipped:false }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid: { display:false } },
+      y: { grid: { color:'rgba(30,92,58,0.35)' }, ticks: { callback: v => (v/1000).toFixed(0)+'k kWh' } }
+    },
+    plugins: {
+      tooltip: { backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11, callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('es-ES')} kWh` } },
+      legend: { labels: { usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 5. IRRADIACIÓN BAR ───
+new Chart(document.getElementById('chartIrrBar'), {
+  type: 'bar',
+  data: {
+    labels: ['PV DURAN', 'PV CAUCEDO', 'PV FP4'],
+    datasets: [
+      { label: 'Irradiación Real',        data: [99.23, null, 180.24], backgroundColor:['rgba(245,158,11,0.8)','rgba(107,114,128,0.3)','rgba(74,222,128,0.8)'], borderRadius:6, borderSkipped:false },
+      { label: 'Irradiación Contractual', data: [125.3, null, 206.66], backgroundColor:['rgba(245,158,11,0.2)','rgba(107,114,128,0.1)','rgba(74,222,128,0.2)'], borderColor:['#f59e0b','#6b7280','#4ade80'], borderWidth:2, borderRadius:6, borderSkipped:false }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid: { display:false } },
+      y: { grid: { color:'rgba(30,92,58,0.35)' }, ticks: { callback: v => v + ' kWh/m²' } }
+    },
+    plugins: {
+      tooltip: { backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11, callbacks:{ label: ctx => ctx.parsed.y!=null ? ` ${ctx.dataset.label}: ${ctx.parsed.y} kWh/m²` : ` Sin dato` } },
+      legend: { labels: { usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 6. STACKED BAR ───
+new Chart(document.getElementById('chartStacked'), {
+  type: 'bar',
+  data: {
+    labels: labels28,
+    datasets: [
+      { label: 'PV DURAN',   data: duranFeb,   backgroundColor: 'rgba(245,158,11,0.82)', borderRadius:0 },
+      { label: 'PV CAUCEDO', data: caucedoFeb, backgroundColor: 'rgba(56,189,248,0.82)',  borderRadius:0 },
+      { label: 'PV FP4',     data: fp4Feb,     backgroundColor: 'rgba(74,222,128,0.82)', borderRadius:0 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { stacked:true, grid:{ display:false } },
+      y: { stacked:true, grid:{ color:'rgba(30,92,58,0.35)' }, ticks:{ callback: v => (v/1000).toFixed(0)+'k' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('es-ES')} kWh`,
+          afterBody: items => { const t=items.reduce((s,i)=>s+i.parsed.y,0); return [`Total del día: ${t.toLocaleString('es-ES')} kWh`]; }
+        }
+      },
+      legend: { labels: { usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 7. YTD FP4 ───
+new Chart(document.getElementById('chartYTD_FP4'), {
+  type: 'bar',
+  data: {
+    labels: mesesFP4,
+    datasets: [
+      { label: 'Real (kWh)',        data: realFP4, backgroundColor: 'rgba(74,222,128,0.78)', borderRadius:6, borderSkipped:false, order:2 },
+      { label: 'Contractual (kWh)', data: comFP4,  type:'line', borderColor:'#a3e635', borderWidth:2.5, pointRadius:5, pointHoverRadius:8, backgroundColor:'rgba(163,230,53,0.1)', fill:false, tension:0.3, order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ display:false } },
+      y: { grid:{ color:'rgba(30,92,58,0.35)' }, ticks:{ callback: v => (v/1000).toFixed(0)+'k' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${(ctx.parsed.y||0).toLocaleString('es-ES')} kWh` }
+      },
+      legend: { labels:{ usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 8. YTD CAUCEDO ───
+new Chart(document.getElementById('chartYTD_CAU'), {
+  type: 'bar',
+  data: {
+    labels: mesesCau,
+    datasets: [
+      { label: 'Real (kWh)',        data: realCau, backgroundColor: 'rgba(56,189,248,0.78)', borderRadius:5, borderSkipped:false, order:2 },
+      { label: 'Contractual (kWh)', data: comCau,  type:'line', borderColor:'#a3e635', borderWidth:2.5, pointRadius:4, pointHoverRadius:7, backgroundColor:'rgba(163,230,53,0.1)', fill:false, tension:0.3, order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ display:false }, ticks:{ font:{size:10} } },
+      y: { grid:{ color:'rgba(30,92,58,0.35)' }, ticks:{ callback: v => (v/1000).toFixed(0)+'k' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${(ctx.parsed.y||0).toLocaleString('es-ES')} kWh` }
+      },
+      legend: { labels:{ usePointStyle:true, pointStyle:'circle', padding:12, color:'#7db99a', font:{size:11} } }
+    }
+  }
+});
+
+// ─── 9. YTD DURAN ───
+new Chart(document.getElementById('chartYTD_DUR'), {
+  type: 'bar',
+  data: {
+    labels: mesesDur,
+    datasets: [
+      { label: 'Real (kWh)',        data: realDur, backgroundColor: 'rgba(245,158,11,0.78)', borderRadius:5, borderSkipped:false, order:2 },
+      { label: 'Contractual (kWh)', data: comDur,  type:'line', borderColor:'#a3e635', borderWidth:2.5, pointRadius:4, pointHoverRadius:7, backgroundColor:'rgba(163,230,53,0.1)', fill:false, tension:0.3, order:1 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ display:false }, ticks:{ font:{size:10} } },
+      y: { grid:{ color:'rgba(30,92,58,0.35)' }, ticks:{ callback: v => (v/1000).toFixed(0)+'k' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${(ctx.parsed.y||0).toLocaleString('es-ES')} kWh` }
+      },
+      legend: { labels:{ usePointStyle:true, pointStyle:'circle', padding:12, color:'#7db99a', font:{size:11} } }
+    }
+  }
+});
+
+// ─── 10. DIF % LINE ───
+new Chart(document.getElementById('chartDifPct'), {
+  type: 'line',
+  data: {
+    labels: mesesFP4,
+    datasets: [
+      { label: 'PV DURAN (%)',   data: difPctDurFull, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)', tension:0.3, pointRadius:5, pointHoverRadius:8, fill:true, borderDash:[5,3], spanGaps:false },
+      { label: 'PV CAUCEDO (%)', data: difPctCau,     borderColor:'#38bdf8', backgroundColor:'rgba(56,189,248,0.06)', tension:0.3, pointRadius:5, pointHoverRadius:8, fill:true },
+      { label: 'PV FP4 (%)',     data: difPctFP4,     borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.06)', tension:0.3, pointRadius:5, pointHoverRadius:8, fill:true }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ color:'rgba(30,92,58,0.35)' } },
+      y: {
+        grid:{ color:'rgba(30,92,58,0.35)' },
+        ticks:{ callback: v => v+'%' },
+        afterDataLimits(axis) { axis.min = Math.min(axis.min,-5); axis.max = Math.max(axis.max,5); }
+      }
+    },
+    plugins: {
+      annotation: {},
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: {
+          label: ctx => ctx.parsed.y!=null ? ` ${ctx.dataset.label}: ${ctx.parsed.y>0?'+':''}${ctx.parsed.y}%` : ` ${ctx.dataset.label}: — (sin datos)`
+        }
+      },
+      legend: { labels:{ usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── 11. YTD BAR COMPARISON ───
+new Chart(document.getElementById('chartYTD_Bar'), {
+  type: 'bar',
+  data: {
+    labels: ['PV DURAN', 'PV CAUCEDO', 'PV FP4'],
+    datasets: [
+      { label: 'Real YTD (kWh)',        data: [535231, 619166, 2963087], backgroundColor:['rgba(245,158,11,0.8)','rgba(56,189,248,0.8)','rgba(74,222,128,0.8)'], borderRadius:6, borderSkipped:false },
+      { label: 'Contractual YTD (kWh)', data: [573163, 705713, 3174496], backgroundColor:['rgba(245,158,11,0.2)','rgba(56,189,248,0.2)','rgba(74,222,128,0.2)'], borderColor:['#f59e0b','#38bdf8','#4ade80'], borderWidth:2, borderRadius:6, borderSkipped:false }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction: { mode:'index', intersect:false },
+    scales: {
+      x: { grid:{ display:false } },
+      y: { grid:{ color:'rgba(30,92,58,0.35)' }, ticks:{ callback: v => (v/1000000).toFixed(1)+'M' } }
+    },
+    plugins: {
+      tooltip: {
+        backgroundColor:'#0f2d20', borderColor:'#1e5c3a', borderWidth:1, titleColor:'#e8f5e9', bodyColor:'#7db99a', padding:11,
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('es-ES')} kWh` }
+      },
+      legend: { labels:{ usePointStyle:true, pointStyle:'circle', padding:16, color:'#7db99a' } }
+    }
+  }
+});
+
+// ─── FILTRO PLANTAS ───
+function filterChart(plant, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const vis = { all:[true,true,true], duran:[true,false,false], caucedo:[false,true,false], fp4:[false,false,true] };
+  const v = vis[plant];
+  chartDiario.data.datasets.forEach((ds, i) => { ds.hidden = !v[i]; });
+  chartDiario.update();
+}
+</script>
+</body>
+</html>
